@@ -4,12 +4,16 @@ package com.adcorreajr.agendaapi.controller.rest;
 import com.adcorreajr.agendaapi.model.dto.AtualizacaoContato;
 import com.adcorreajr.agendaapi.model.entity.Contato;
 import com.adcorreajr.agendaapi.model.repository.ContatoRepository;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.servlet.http.Part;
 import javax.validation.Valid;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 @RestController
@@ -73,6 +77,28 @@ public class ContatoController {
                     contato.setFavorito(!favorito);
                     contatoRepository.save(contato);
                     return Void.TYPE;
+                })
+                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Contato não encontrado."));
+    }
+
+
+    @PatchMapping("/{id}/foto")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public byte[] addFoto(@PathVariable Integer id, @RequestParam("foto") Part arquivo){
+
+        return contatoRepository.findById(id)
+                .map( contato -> {
+                    try {
+                        InputStream is = arquivo.getInputStream();
+                        byte[] bytes = new byte[(int) arquivo.getSize()];
+                        IOUtils.readFully(is, bytes);
+                        contato.setFoto(bytes);
+                        contatoRepository.save(contato);
+                        is.close();
+                        return bytes;
+                    }catch (IOException ex){
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Não foi possível fazer o upload do arquivo.");
+                    }
                 })
                 .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Contato não encontrado."));
     }
