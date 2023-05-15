@@ -6,6 +6,8 @@ import com.adcorreajr.agendaapi.model.entity.Contato;
 import com.adcorreajr.agendaapi.model.repository.ContatoRepository;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -31,8 +33,10 @@ public class ContatoController {
     }
 
     @GetMapping({"","/"})
-    public List<Contato> getAll(){
-        return contatoRepository.findAll();
+    public Page<Contato> getAll( @RequestParam(value = "page", defaultValue = "0") Integer pagina,
+                        @RequestParam(value = "size", defaultValue = "10") Integer tamanhoPagina){
+
+        return contatoRepository.findAll(PageRequest.of(pagina, tamanhoPagina));
     }
 
     @GetMapping("/{id}")
