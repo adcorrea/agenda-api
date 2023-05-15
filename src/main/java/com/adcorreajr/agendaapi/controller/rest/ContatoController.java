@@ -8,6 +8,7 @@ import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -35,8 +36,8 @@ public class ContatoController {
     @GetMapping({"","/"})
     public Page<Contato> getAll( @RequestParam(value = "page", defaultValue = "0") Integer pagina,
                         @RequestParam(value = "size", defaultValue = "10") Integer tamanhoPagina){
-
-        return contatoRepository.findAll(PageRequest.of(pagina, tamanhoPagina));
+        Sort sort = Sort.by(Sort.Direction.ASC, "nome");
+        return contatoRepository.findAll(PageRequest.of(pagina, tamanhoPagina, sort));
     }
 
     @GetMapping("/{id}")
